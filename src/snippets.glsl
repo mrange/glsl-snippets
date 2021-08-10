@@ -1,10 +1,9 @@
+// -----------------------------------------------------------------------------
 // Licenses
 //  CC0   - https://creativecommons.org/share-your-work/public-domain/cc0/
 //  MIT   - https://mit-license.org/
 //  WTFPL - https://en.wikipedia.org/wiki/WTFPL
-
-// All my code is licensed under CC0 which relinquishes copyright.
-//  No need to reference me or keep the copyright license notification
+// -----------------------------------------------------------------------------
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 #define TIME        time
@@ -17,6 +16,9 @@
 #define ROT(a)      mat2(cos(a), sin(a), -sin(a), cos(a))
 #define PSIN(x)     (0.5+0.5*sin(x))
 #define PCOS(x)     (0.5+0.5*cos(x))
+#define BPM         120.0
+#define BTIME(n)    ((n)*60.0/BPM)
+#define SCA(a)      vec2(sin(a), cos(a))
 
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
 const vec4 hsv2rgb_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -138,6 +140,50 @@ float box(vec2 p, vec2 b) {
   return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
 
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float isosceles(vec2 p, vec2 q) {
+  p.x = abs(p.x);
+  vec2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
+  vec2 b = p - q*vec2( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
+  float s = -sign( q.y );
+  vec2 d = min( vec2( dot(a,a), s*(p.x*q.y-p.y*q.x) ),
+                vec2( dot(b,b), s*(p.y-q.y)  ));
+  return -sqrt(d.x)*sign(d.y);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float horseshoe(vec2 p, vec2 c, float r, vec2 w) {
+  p.x = abs(p.x);
+  float l = length(p);
+  p = mat2(-c.x, c.y,
+            c.y, c.x)*p;
+  p = vec2((p.y>0.0)?p.x:l*sign(-c.x),
+           (p.x>0.0)?p.y:l );
+  p = vec2(p.x,abs(p.y-r))-w;
+  return length(max(p,0.0)) + min(0.0,max(p.x,p.y));
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float segment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p-a, ba = b-a;
+  float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+  return length( pa - ba*h );
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float parabola(vec2 pos, float k) {
+  pos.x = abs(pos.x);
+  float ik = 1.0/k;
+  float p = ik*(pos.y - 0.5*ik)/3.0;
+  float q = 0.25*ik*ik*pos.x;
+  float h = q*q - p*p*p;
+  float r = sqrt(abs(h));
+  float x = (h>0.0) ?
+        pow(q+r,1.0/3.0) - pow(abs(q-r),1.0/3.0)*sign(r-q) :
+        2.0*cos(atan(r,q)/3.0)*sqrt(p);
+  return length(pos-vec2(x,k*x*x)) * sign(pos.x-x);
+}
+
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
 float raySphere(vec3 ro, vec3 rd, vec4 sph) {
     vec3 oc = ro - sph.xyz;
@@ -173,6 +219,11 @@ float hash(float co) {
 vec2 hash(vec2 p) {
   p = vec2(dot (p, vec2 (127.1, 311.7)), dot (p, vec2 (269.5, 183.3)));
   return -1. + 2.*fract (sin (p)*43758.5453123);
+}
+
+// License: Unknown, author: Unknown, found: don't remember
+float hash(vec3 r)  {
+  return fract(sin(dot(r.xy,vec2(1.38984*sin(r.z),1.13233*cos(r.z))))*653758.5453);
 }
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
