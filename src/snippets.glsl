@@ -18,7 +18,8 @@
 #define PSIN(x)     (0.5+0.5*sin(x))
 #define PCOS(x)     (0.5+0.5*cos(x))
 #define BPM         120.0
-#define BTIME(n)    ((n)*60.0/BPM)
+#define BTIME_1ST   0.0
+#define BTIME(n)    (BTIME_1ST+(n)*60.0/BPM)
 #define SCA(a)      vec2(sin(a), cos(a))
 
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
