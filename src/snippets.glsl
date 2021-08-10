@@ -184,6 +184,20 @@ float parabola(vec2 pos, float k) {
   return length(pos-vec2(x,k*x*x)) * sign(pos.x-x);
 }
 
+// License: MIT OR CC-BY-NC-4.0, author: mercury, found: https://mercury.sexy/hg_sdf/
+float corner(vec2 p) {
+  vec2 v = min(p, vec2(0));
+  return length(max(p, vec2(0))) + max(v.x, v.y);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float roundedBox(vec2 p, vec2 b, vec4 r) {
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
 float raySphere(vec3 ro, vec3 rd, vec4 sph) {
     vec3 oc = ro - sph.xyz;
