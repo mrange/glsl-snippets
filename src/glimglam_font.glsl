@@ -23,16 +23,32 @@ float pmax(float a, float b, float k) {
   return -pmin(-a, -b, k);
 }
 
+// License: MIT OR CC-BY-NC-4.0, author: mercury, found: https://mercury.sexy/hg_sdf/
+float corner(vec2 p) {
+  vec2 v = min(p, vec2(0));
+  return length(max(p, vec2(0))) + max(v.x, v.y);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float roundedBox(vec2 p, vec2 b, vec4 r) {
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_bar(vec2 p) {
   vec2 pbar = p;
-  pbar.y -= topy;
-  return abs(pbar.y)-corner0;
+  pbar.y -= glimglam_topy;
+  return abs(pbar.y)-glimglam_corner0;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_a(vec2 p) {
   p.x = abs(p.x);
-  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(corner1, corner0, corner1, corner0));
-  float dc = corner(p-vec2(0.045, -0.07))-corner0;
+  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner1, glimglam_corner0));
+  float dc = corner(p-vec2(0.045, -0.07))-glimglam_corner0;
 
   float d = db;
   d = max(d, -dc);
@@ -40,11 +56,12 @@ float glimglam_a(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_c(vec2 p) {
   p = -p.yx;
-  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(corner1, corner0, corner1, corner0));
+  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner1, glimglam_corner0));
   p.x = abs(p.x);
-  float dc = corner(p-vec2(0.055, topy))-corner0;
+  float dc = corner(p-vec2(0.055, glimglam_topy))-glimglam_corner0;
 
   float d = db;
   d = max(d, -dc);
@@ -52,64 +69,71 @@ float glimglam_c(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_e(vec2 p) {
   p = -p.yx;
-  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(corner0, corner0, corner0, corner0));
+  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(glimglam_corner0, glimglam_corner0, glimglam_corner0, glimglam_corner0));
 
-  float dl = abs(p.x-(0.075-corner0))-corner0;
-  float dt = p.y-topy;
+  float dl = abs(p.x-(0.075-glimglam_corner0))-glimglam_corner0;
+  float dt = p.y-glimglam_topy;
 
   float d = db;
-  d = max(d, -pmax(dl,dt, smoother));
+  d = max(d, -pmax(dl,dt, glimglam_smoother));
 
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_g(vec2 p) {
-  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(corner0, corner1, corner1, corner1));
+  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(glimglam_corner0, glimglam_corner1, glimglam_corner1, glimglam_corner1));
   float dc = corner(-(p-vec2(-0.045, -0.055)));
-  dc = abs(dc) - corner0;
-  float dd = max(p.x-0.065, p.y-topy);
+  dc = abs(dc) - glimglam_corner0;
+  float dd = max(p.x-0.065, p.y-glimglam_topy);
   float d = db;
   d = max(d, -max(dc, dd));
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_h(vec2 p) {
   p.x = abs(p.x);
-  float da = roundedBox(p-vec2(0.13, 0.0), vec2 (0.066, 0.166), vec4(corner0));
-  float db = roundedBox(p, vec2 (0.16, 0.05), vec4(corner0));
+  float da = roundedBox(p-vec2(0.13, 0.0), vec2 (0.066, 0.166), vec4(glimglam_corner0));
+  float db = roundedBox(p, vec2 (0.16, 0.05), vec4(glimglam_corner0));
   float d = da;
   d = min(d, db);
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_i(vec2 p) {
-  return roundedBox(p, vec2 (0.066, 0.166), vec4(corner0));
+  return roundedBox(p, vec2 (0.066, 0.166), vec4(glimglam_corner0));
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_j(vec2 p) {
   p.x = -p.x;
-  float db = roundedBox(p, vec2 (0.15, 0.166), vec4(corner0, corner0, corner0, corner1));
-  float dc = corner(-(p-vec2(-0.007, -0.055)))-corner0;
+  float db = roundedBox(p, vec2 (0.15, 0.166), vec4(glimglam_corner0, glimglam_corner0, glimglam_corner0, glimglam_corner1));
+  float dc = corner(-(p-vec2(-0.007, -0.055)))-glimglam_corner0;
   float d = db;
   d = max(d, -dc);
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_l(vec2 p) {
-  float db = roundedBox(p, vec2 (0.175, 0.166), vec4(corner0, corner0, corner0, corner1));
-  float dc = corner(-(p-vec2(-0.027, -0.055)))-corner0;
+  float db = roundedBox(p, vec2 (0.175, 0.166), vec4(glimglam_corner0, glimglam_corner0, glimglam_corner0, glimglam_corner1));
+  float dc = corner(-(p-vec2(-0.027, -0.055)))-glimglam_corner0;
   float d = db;
   d = max(d, -dc);
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_m(vec2 p) {
-  float db = roundedBox(p, vec2 (0.255, 0.166), vec4(corner1, corner0, corner0, corner0));
+  float db = roundedBox(p, vec2 (0.255, 0.166), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner0, glimglam_corner0));
   p.x = abs(p.x);
-  float dl = abs(p.x-0.095)-corner0*2.0;
-  float dt = p.y-topy;
+  float dl = abs(p.x-0.095)-glimglam_corner0*2.0;
+  float dt = p.y-glimglam_topy;
 
   float d = db;
   d = max(d, -max(dl,dt));
@@ -117,11 +141,12 @@ float glimglam_m(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_n(vec2 p) {
-  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(corner1, corner0, corner0, corner0));
+  float db = roundedBox(p, vec2 (0.19, 0.166), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner0, glimglam_corner0));
 
   float dl = abs(p.x)-0.07;
-  float dt = p.y-topy;
+  float dt = p.y-glimglam_topy;
 
   float d = db;
   d = max(d, -max(dl,dt));
@@ -129,9 +154,10 @@ float glimglam_n(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_o(vec2 p) {
   const float sz = 0.05;
-  float db = roundedBox(p, vec2(0.19, 0.166)-sz, vec4(corner1, corner1, corner1, corner1)-sz);
+  float db = roundedBox(p, vec2(0.19, 0.166)-sz, vec4(glimglam_corner1, glimglam_corner1, glimglam_corner1, glimglam_corner1)-sz);
   db = abs(db)-sz;
 
   float d = db;
@@ -139,65 +165,69 @@ float glimglam_o(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_s(vec2 p) {
   p.x = -p.x;
   p = -p.yx;
-  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(corner1, corner0, corner0, corner1));
+  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner0, glimglam_corner1));
   vec2 pc = p;
   pc.x *= sign(pc.y);
   pc.y = abs(pc.y);
-  float cr = corner1*1.3;
+  float cr = glimglam_corner1*1.3;
   pc -=vec2(-0.055, 0.20);
   pc.x = -pc.x;
   float dc = corner(pc+cr)-cr;
   vec2 pk = p;
   pk = -abs(pk);
-  float dk = pk.x+topy;
+  float dk = pk.x+glimglam_topy;
   dc = min(dk, dc);
 
-  float dl = abs(p.x-(0.075-corner0))-corner0;
-  float dt = p.y-topy;
+  float dl = abs(p.x-(0.075-glimglam_corner0))-glimglam_corner0;
+  float dt = p.y-glimglam_topy;
 
   float d = db;
-  d = max(d, -pmax(dl,dt, smoother));
-  d = pmax(d, dc, smoother);
+  d = max(d, -pmax(dl,dt, glimglam_smoother));
+  d = pmax(d, dc, glimglam_smoother);
 
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_t(vec2 p) {
-  float da = roundedBox(p-vec2(0.0, 0.12), vec2 (0.166, 0.05), vec4(corner0));
-  float db = roundedBox(p, vec2 (0.066, 0.166), vec4(corner0));
+  float da = roundedBox(p-vec2(0.0, 0.12), vec2 (0.166, 0.05), vec4(glimglam_corner0));
+  float db = roundedBox(p, vec2 (0.066, 0.166), vec4(glimglam_corner0));
   float d = da;
   d = min(d, db);
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam_z(vec2 p) {
   p = -p.yx;
-  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(corner0, corner0, corner0, corner0));
+  float db = roundedBox(p, vec2 (0.166, 0.19), vec4(glimglam_corner0, glimglam_corner0, glimglam_corner0, glimglam_corner0));
   vec2 pc = p;
   pc.x *= sign(pc.y);
   pc.y = abs(pc.y);
-  float cr = corner1*1.3;
+  float cr = glimglam_corner1*1.3;
   pc -=vec2(-0.055, 0.20);
   pc.x = -pc.x;
   float dc = corner(pc+cr)-cr;
   vec2 pk = p;
   pk = -abs(pk);
-  float dk = pk.x+topy;
+  float dk = pk.x+glimglam_topy;
   dc = min(dk, dc);
 
-  float dl = abs(p.x-(0.075-corner0))-corner0;
-  float dt = p.y-topy;
+  float dl = abs(p.x-(0.075-glimglam_corner0))-glimglam_corner0;
+  float dt = p.y-glimglam_topy;
 
   float d = db;
-  d = max(d, -pmax(dl,dt, smoother));
-  d = pmax(d, dc, smoother);
+  d = max(d, -pmax(dl,dt, glimglam_smoother));
+  d = pmax(d, dc, glimglam_smoother);
 
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float glimglam(vec2 p) {
   float dbar = glimglam_bar(p);
 
@@ -236,11 +266,12 @@ float glimglam(vec2 p) {
   d = min(d, di);
   d = min(d, da);
   d = min(d, dm);
-  d = pmax(d, -dbar, smoother);
+  d = pmax(d, -dbar, glimglam_smoother);
 
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float lance(vec2 p) {
   p.x -= -0.810;
   float dbar = glimglam_bar(p);
@@ -270,11 +301,12 @@ float lance(vec2 p) {
   d = min(d, dn);
   d = min(d, dc);
   d = min(d, de);
-  d = pmax(d, -dbar, smoother);
+  d = pmax(d, -dbar, glimglam_smoother);
 
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float jez(vec2 p) {
   p.x -= -0.401;
   float dbar = glimglam_bar(p);
@@ -294,10 +326,11 @@ float jez(vec2 p) {
   d = min(d, dj);
   d = min(d, de);
   d = min(d, dz);
-  d = pmax(d, -dbar, smoother);
+  d = pmax(d, -dbar, glimglam_smoother);
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float longshot(vec2 p) {
   p.x -= -1.385;
   float dbar = glimglam_bar(p);
@@ -339,8 +372,6 @@ float longshot(vec2 p) {
   d = min(d, ds);
   d = min(d, dh);
   d = min(d, dt);
-  d = pmax(d, -dbar, smoother);
+  d = pmax(d, -dbar, glimglam_smoother);
   return d;
 }
-
-

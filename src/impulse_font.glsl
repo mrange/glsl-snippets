@@ -8,6 +8,8 @@
 // Impulse distance field font
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define PI              3.141592654
+#define ROT(a)          mat2(cos(a), sin(a), -sin(a), cos(a))
 #define SCA(a)          vec2(sin(a), cos(a))
 
 const vec2 impulse_sca0 = SCA(0.0);
@@ -195,3 +197,4 @@ float presents(vec2 p) {
   float d = presents(p, 0.25);
   return impulse_bars(p, d);
 }
+

@@ -7,16 +7,20 @@
 
 // Atari logo and text
 
+#define PI          3.141592654
+
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/smin/smin.htm
 float pmin(float a, float b, float k) {
   float h = clamp(0.5+0.5*(b-a)/k, 0.0, 1.0);
   return mix(b, a, h) - k*h*(1.0-h);
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float pmax(float a, float b, float k) {
   return -pmin(-a, -b, k);
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float pabs(float a, float k) {
   return pmax(a, -a, k);
 }
@@ -27,6 +31,7 @@ float box(vec2 p, vec2 b) {
   return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float circle(vec2 p, float r) {
   return length(p) - r;
 }
@@ -75,6 +80,7 @@ float parabola(vec2 pos, float k) {
   return length(pos-vec2(x,k*x*x)) * sign(pos.x-x);
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari_logo(vec2 p) {
   p.x = abs(p.x);
   float db = box(p, vec2(0.36, 0.32));
@@ -97,6 +103,7 @@ float atari_logo(vec2 p) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari_a(inout vec2 p, vec2 off) {
   p -= vec2(0.275, 0.0);
 
@@ -115,6 +122,7 @@ float atari_a(inout vec2 p, vec2 off) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari_i(inout vec2 p, vec2 off) {
   p -= vec2(0.07, 0.0);
 
@@ -126,6 +134,7 @@ float atari_i(inout vec2 p, vec2 off) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari_r(inout vec2 p, vec2 off) {
   p -= vec2(0.22, 0.0);
 
@@ -154,6 +163,7 @@ float atari_r(inout vec2 p, vec2 off) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari_t(inout vec2 p, vec2 off) {
   p -= vec2(0.195, 0.0);
 
@@ -168,6 +178,7 @@ float atari_t(inout vec2 p, vec2 off) {
   return d;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float atari(vec2 p) {
   p -= vec2(-0.33, 0.0);
   float d = 1E6;
