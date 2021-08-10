@@ -96,6 +96,24 @@ float modMirror1(inout float p, float size) {
   return c;
 }
 
+// License: Unknown, author: Martijn Steinrucken, found: https://www.youtube.com/watch?v=VmrIDyYiJBA
+vec2 hextile(inout vec2 p) {
+  // See Art of Code: Hexagonal Tiling Explained!
+  // https://www.youtube.com/watch?v=VmrIDyYiJBA
+  const vec2 sz       = vec2(1.0, sqrt(3.0));
+  const vec2 hsz      = 0.5*sz;
+
+  vec2 p1 = mod(p, sz)-hsz;
+  vec2 p2 = mod(p - hsz, sz)-hsz;
+  vec2 p3 = dot(p1, p1) < dot(p2, p2) ? p1 : p2;
+  vec2 n = ((p3 - p + hsz)/sz);
+  p = p3;
+
+  n -= vec2(0.5);
+  // Rounding to make hextile 0,0 well behaved
+  return round(n*2.0)*0.5;
+}
+
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float smoothKaleidoscope(inout vec2 p, float sm, float rep) {
   vec2 hp = p;
@@ -143,11 +161,11 @@ float box(vec2 p, vec2 b) {
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float isosceles(vec2 p, vec2 q) {
   p.x = abs(p.x);
-  vec2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
-  vec2 b = p - q*vec2( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
-  float s = -sign( q.y );
-  vec2 d = min( vec2( dot(a,a), s*(p.x*q.y-p.y*q.x) ),
-                vec2( dot(b,b), s*(p.y-q.y)  ));
+  vec2 a = p - q*clamp(dot(p,q)/dot(q,q), 0.0, 1.0);
+  vec2 b = p - q*vec2(clamp(p.x/q.x, 0.0, 1.0), 1.0);
+  float s = -sign(q.y);
+  vec2 d = min(vec2(dot(a,a), s*(p.x*q.y-p.y*q.x)),
+               vec2(dot(b,b), s*(p.y-q.y)));
   return -sqrt(d.x)*sign(d.y);
 }
 
@@ -158,7 +176,7 @@ float horseshoe(vec2 p, vec2 c, float r, vec2 w) {
   p = mat2(-c.x, c.y,
             c.y, c.x)*p;
   p = vec2((p.y>0.0)?p.x:l*sign(-c.x),
-           (p.x>0.0)?p.y:l );
+           (p.x>0.0)?p.y:l);
   p = vec2(p.x,abs(p.y-r))-w;
   return length(max(p,0.0)) + min(0.0,max(p.x,p.y));
 }
@@ -166,8 +184,8 @@ float horseshoe(vec2 p, vec2 c, float r, vec2 w) {
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float segment(vec2 p, vec2 a, vec2 b) {
   vec2 pa = p-a, ba = b-a;
-  float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-  return length( pa - ba*h );
+  float h = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);
+  return length(pa - ba*h);
 }
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
@@ -192,21 +210,51 @@ float corner(vec2 p) {
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float roundedBox(vec2 p, vec2 b, vec4 r) {
-    r.xy = (p.x>0.0)?r.xy : r.zw;
-    r.x  = (p.y>0.0)?r.x  : r.y;
-    vec2 q = abs(p)-b+r.x;
-    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+  r.xy = (p.x>0.0)?r.xy : r.zw;
+  r.x  = (p.y>0.0)?r.x  : r.y;
+  vec2 q = abs(p)-b+r.x;
+  return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
 float raySphere(vec3 ro, vec3 rd, vec4 sph) {
-    vec3 oc = ro - sph.xyz;
-    float b = dot( oc, rd );
-    float c = dot( oc, oc ) - sph.w*sph.w;
-    float h = b*b - c;
-    if( h<0.0 ) return -1.0;
-    h = sqrt( h );
-    return -b - h;
+  vec3 oc = ro - sph.xyz;
+  float b = dot(oc, rd);
+  float c = dot(oc, oc) - sph.w*sph.w;
+  float h = b*b - c;
+  if(h<0.0) return -1.0;
+  h = sqrt(h);
+  return -b - h;
+}
+
+// License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
+vec2 raySphere2(vec3 ro, vec3 rd, vec4 sph) {
+  vec3 oc = ro - sph.xyz;
+  float b = dot(oc, rd);
+  float c = dot(oc, oc) - sph.w*sph.w;
+  float h = b*b - c;
+  if(h<0.0) return vec2(-1.0);
+  h = sqrt(h);
+  return vec2(-b - h, -b + h);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
+float raySphereDensity(vec3 ro, vec3 rd, vec4 sph, float dbuffer) {
+  float ndbuffer = dbuffer/sph.w;
+  vec3  rc = (ro - sph.xyz)/sph.w;
+  float b = dot(rd,rc);
+  float c = dot(rc,rc) - 1.0;
+  float h = b*b - c;
+  if(h<0.0) return 0.0;
+  h = sqrt(h);
+  float t1 = -b - h;
+  float t2 = -b + h;
+  if(t2<0.0 || t1>ndbuffer) return 0.0;
+  t1 = max(t1, 0.0);
+  t2 = min(t2, ndbuffer);
+  float i1 = -(c*t1 + b*t1*t1 + t1*t1*t1/3.0);
+  float i2 = -(c*t2 + b*t2*t2 + t2*t2*t2/3.0);
+  return (i2-i1)*(3.0/4.0);
 }
 
 // License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV

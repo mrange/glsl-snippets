@@ -2,12 +2,12 @@
 // -----------------------------------------------------------------------------
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 // -----------------------------------------------------------------------------
-precision highp float;
-uniform float time;
-uniform vec2 resolution;
-in vec2 v_texcoord;
-out vec4 fragColor;
+precision highp float   ;
 
+uniform float time      ;
+uniform vec2  resolution;
+in vec2       v_texcoord;
+out vec4      fragColor ;
 // -----------------------------------------------------------------------------
 
 #define TIME        time
