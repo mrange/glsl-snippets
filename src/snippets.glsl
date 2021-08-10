@@ -266,9 +266,9 @@ float atan_approx(float y, float x) {
 }
 
 // License: Unknown, author: Unknown, found: don't remember
-//  Found this somewhere on the interwebs
 float tanh_approx(float x) {
-//  return tanh(x);
+  //  Found this somewhere on the interwebs
+  //  return tanh(x);
   float x2 = x*x;
   return clamp(x*(27.0 + x2)/(27.0+9.0*x2), -1.0, 1.0);
 }
@@ -291,6 +291,7 @@ float hash(vec3 r)  {
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec4 alphaBlend(vec4 back, vec4 front) {
+  // Based on: https://en.wikipedia.org/wiki/Alpha_compositing
   float w = front.w + back.w*(1.0-front.w);
   vec3 xyz = (front.xyz*front.w + back.xyz*back.w*(1.0-front.w))/w;
   return w > 0.0 ? vec4(xyz, w) : vec4(0.0);
@@ -298,16 +299,19 @@ vec4 alphaBlend(vec4 back, vec4 front) {
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3 alphaBlend(vec3 back, vec4 front) {
+  // Based on: https://en.wikipedia.org/wiki/Alpha_compositing
   return mix(back, front.xyz, front.w);
 }
 
 // License: Unknown, author: Unknown, found: don't remember
-//  Found this somewhere on the interwebs
 vec3 postProcess(vec3 col, vec2 q) {
+  //  Found this somewhere on the interwebs
   col = clamp(col, 0.0, 1.0);
+  // Gamma correction
   col = pow(col, 1.0/vec3(2.2));
   col = col*0.6+0.4*col*col*(3.0-2.0*col);
   col = mix(col, vec3(dot(col, vec3(0.33))), -0.4);
-  col *=0.5+0.5*pow(19.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.7);
+  // Vignetting
+  col*= 0.5+0.5*pow(19.0*q.x*q.y*(1.0-q.x)*(1.0-q.y),0.7);
   return col;
 }
