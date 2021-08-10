@@ -1,8 +1,9 @@
 // -----------------------------------------------------------------------------
 // Licenses
-//  CC0   - https://creativecommons.org/share-your-work/public-domain/cc0/
-//  MIT   - https://mit-license.org/
-//  WTFPL - https://en.wikipedia.org/wiki/WTFPL
+//  CC0     - https://creativecommons.org/share-your-work/public-domain/cc0/
+//  MIT     - https://mit-license.org/
+//  WTFPL   - https://en.wikipedia.org/wiki/WTFPL
+//  Unknown - No license identified, does not mean public domain
 // -----------------------------------------------------------------------------
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
