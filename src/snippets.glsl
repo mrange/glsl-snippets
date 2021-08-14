@@ -21,6 +21,8 @@
 #define BTIME_1ST   0.0
 #define BTIME(n)    (BTIME_1ST+(n)*60.0/BPM)
 #define SCA(a)      vec2(sin(a), cos(a))
+#define DOT2(x)     dot(x, x)
+
 
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
 const vec4 hsv2rgb_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -47,6 +49,12 @@ vec3 rgb2hsv(vec3 c) {
 vec3  saturate(in vec3 a)   { return clamp(a, 0.0, 1.0); }
 vec2  saturate(in vec2 a)   { return clamp(a, 0.0, 1.0); }
 float saturate(in float a)  { return clamp(a, 0.0, 1.0); }
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+float dot2(vec2 x) {
+  return dot(x, x);
+}
+
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/smin/smin.htm
 float pmin(float a, float b, float k) {
@@ -218,6 +226,42 @@ float roundedBox(vec2 p, vec2 b, vec4 r) {
   return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
 
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float bezier(vec2 pos, vec2 A, vec2 B, vec2 C) {
+  vec2 a = B - A;
+  vec2 b = A - 2.0*B + C;
+  vec2 c = a * 2.0;
+  vec2 d = A - pos;
+  float kk = 1.0/dot(b,b);
+  float kx = kk * dot(a,b);
+  float ky = kk * (2.0*dot(a,a)+dot(d,b)) / 3.0;
+  float kz = kk * dot(d,a);
+  float res = 0.0;
+  float p = ky - kx*kx;
+  float p3 = p*p*p;
+  float q = kx*(2.0*kx*kx-3.0*ky) + kz;
+  float h = q*q + 4.0*p3;
+  if(h >= 0.0) {
+    h = sqrt(h);
+    vec2 x = (vec2(h,-h)-q)/2.0;
+    vec2 uv = sign(x)*pow(abs(x), vec2(1.0/3.0));
+    float t = clamp(uv.x+uv.y-kx, 0.0, 1.0);
+    res = dot2(d + (c + b*t)*t);
+  } else {
+    float z = sqrt(-p);
+    float v = acos(q/(p*z*2.0)) / 3.0;
+    float m = cos(v);
+    float n = sin(v)*1.732050808;
+    vec3  t = clamp(vec3(m+m,-n-m,n-m)*z-kx,0.0,1.0);
+    res = min(dot2(d+(c+b*t.x)*t.x),
+              dot2(d+(c+b*t.y)*t.y));
+    // the third root cannot be the closest
+    // res = min(res,dot2(d+(c+b*t.z)*t.z));
+  }
+  return sqrt(res);
+}
+
+
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
 float raySphere(vec3 ro, vec3 rd, vec4 sph) {
   vec3 oc = ro - sph.xyz;
@@ -257,6 +301,109 @@ float raySphereDensity(vec3 ro, vec3 rd, vec4 sph, float dbuffer) {
   float i1 = -(c*t1 + b*t1*t1 + t1*t1*t1/3.0);
   float i2 = -(c*t2 + b*t2*t2 + t2*t2*t2/3.0);
   return (i2-i1)*(3.0/4.0);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+float rayTorus(vec3 ro, vec3 rd, vec2 tor) {
+  float po = 1.0;
+
+  float Ra2 = tor.x*tor.x;
+  float ra2 = tor.y*tor.y;
+
+  float m = dot(ro,ro);
+  float n = dot(ro,rd);
+
+  // bounding sphere
+  {
+    float h = n*n - m + (tor.x+tor.y)*(tor.x+tor.y);
+    if(h<0.0) return -1.0;
+    //float t = -n-sqrt(h); // could use this to compute intersections from ro+t*rd
+  }
+
+  // find quartic equation
+  float k = (m - ra2 - Ra2)/2.0;
+  float k3 = n;
+  float k2 = n*n + Ra2*rd.z*rd.z + k;
+  float k1 = k*n + Ra2*ro.z*rd.z;
+  float k0 = k*k + Ra2*ro.z*ro.z - Ra2*ra2;
+
+  #ifndef TORUS_REDUCE_PRECISION
+  // prevent |c1| from being too close to zero
+  if(abs(k3*(k3*k3 - k2) + k1) < 0.01)
+  {
+    po = -1.0;
+    float tmp=k1; k1=k3; k3=tmp;
+    k0 = 1.0/k0;
+    k1 = k1*k0;
+    k2 = k2*k0;
+    k3 = k3*k0;
+  }
+  #endif
+
+  float c2 = 2.0*k2 - 3.0*k3*k3;
+  float c1 = k3*(k3*k3 - k2) + k1;
+  float c0 = k3*(k3*(-3.0*k3*k3 + 4.0*k2) - 8.0*k1) + 4.0*k0;
+
+
+  c2 /= 3.0;
+  c1 *= 2.0;
+  c0 /= 3.0;
+
+  float Q = c2*c2 + c0;
+  float R = 3.0*c0*c2 - c2*c2*c2 - c1*c1;
+
+  float h = R*R - Q*Q*Q;
+  float z = 0.0;
+  if(h < 0.0) {
+    // 4 intersections
+    float sQ = sqrt(Q);
+    z = 2.0*sQ*cos(acos(R/(sQ*Q)) / 3.0);
+  } else {
+    // 2 intersections
+    float sQ = pow(sqrt(h) + abs(R), 1.0/3.0);
+    z = sign(R)*abs(sQ + Q/sQ);
+  }
+  z = c2 - z;
+
+  float d1 = z   - 3.0*c2;
+  float d2 = z*z - 3.0*c0;
+  if(abs(d1) < 1.0e-4) {
+    if(d2 < 0.0) return -1.0;
+    d2 = sqrt(d2);
+  } else {
+    if(d1 < 0.0) return -1.0;
+    d1 = sqrt(d1/2.0);
+    d2 = c1/d1;
+  }
+
+  //----------------------------------
+
+  float result = 1e20;
+
+  h = d1*d1 - z + d2;
+  if(h > 0.0) {
+    h = sqrt(h);
+    float t1 = -d1 - h - k3; t1 = (po<0.0)?2.0/t1:t1;
+    float t2 = -d1 + h - k3; t2 = (po<0.0)?2.0/t2:t2;
+    if(t1 > 0.0) result=t1;
+    if(t2 > 0.0) result=min(result,t2);
+  }
+
+  h = d1*d1 - z - d2;
+  if(h > 0.0) {
+    h = sqrt(h);
+    float t1 = d1 - h - k3;  t1 = (po<0.0)?2.0/t1:t1;
+    float t2 = d1 + h - k3;  t2 = (po<0.0)?2.0/t2:t2;
+    if(t1 > 0.0) result=min(result,t1);
+    if(t2 > 0.0) result=min(result,t2);
+  }
+
+  return result;
+}
+
+// License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+vec3 torusNormal(vec3 pos, vec2 tor) {
+  return normalize(pos*(dot(pos,pos)- tor.y*tor.y - tor.x*tor.x*vec3(1.0,1.0,-1.0)));
 }
 
 // License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV
