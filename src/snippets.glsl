@@ -451,7 +451,7 @@ vec3 alphaBlend(vec3 back, vec4 front) {
   return mix(back, front.xyz, front.w);
 }
 
-// License: Unknown, author: Unknown, found: don't remember
+// License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/index.htm
 vec3 postProcess(vec3 col, vec2 q) {
   //  Found this somewhere on the interwebs
   col = clamp(col, 0.0, 1.0);
