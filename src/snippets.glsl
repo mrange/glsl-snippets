@@ -45,6 +45,31 @@ vec3 rgb2hsv(vec3 c) {
   return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
+// License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
+float sRGB(float t) { return mix(1.055*pow(t, 1./2.4) - 0.055, 12.92*t, step(t, 0.0031308)); }
+// License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
+vec3 sRGB(in vec3 c) { return vec3 (sRGB(c.x), sRGB(c.y), sRGB(c.z)); }
+
+// License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
+vec3 rgb_lerp(in vec3 a, in vec3 b, in float x) {
+    //Interpolated base color (with singularity fix)
+    vec3 ic = mix(a, b, x) + vec3(1e-6,0.,0.);
+
+    //Saturation difference from ideal scenario
+    float sd = abs(getsat(ic) - mix(getsat(a), getsat(b), x));
+
+    //Displacement direction
+    vec3 dir = normalize(vec3(2.*ic.x - ic.y - ic.z, 2.*ic.y - ic.x - ic.z, 2.*ic.z - ic.y - ic.x));
+    //Simple Lighntess
+    float lgt = dot(vec3(1.0), ic);
+
+    //Extra scaling factor for the displacement
+    float ff = dot(dir, normalize(ic));
+
+    //Displace the color
+    ic += DSP_STR*dir*sd*ff*lgt;
+    return clamp(ic,0.,1.);
+}
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3  saturate(in vec3 a)   { return clamp(a, 0.0, 1.0); }
 vec2  saturate(in vec2 a)   { return clamp(a, 0.0, 1.0); }
@@ -197,6 +222,20 @@ float segment(vec2 p, vec2 a, vec2 b) {
   float h = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);
   return length(pa - ba*h);
 }
+
+// License: MIT, author: Inigo Quilez, found: https://www.shadertoy.com/view/wsGSD3
+float snowflake(vec2 p) {
+  const vec2 k = vec2(0.5,-sqrt(3.0))/2.0;
+  p = p.yx;
+  p = abs(p);
+  p -= 2.0*min(dot(k,p),0.0)*k;
+  p = abs(p);
+  float d  = segment(p, vec2(.00, 0), vec2(.75, 0));
+  d = min(d, segment(p, vec2(.50, 0), vec2(.50, 0) + .10));
+  d = min(d, segment(p, vec2(.25, 0), vec2(.25, 0) + .15));
+  return d;
+}
+
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float parabola(vec2 pos, float k) {
