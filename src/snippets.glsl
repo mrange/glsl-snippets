@@ -51,6 +51,14 @@ float sRGB(float t) { return mix(1.055*pow(t, 1./2.4) - 0.055, 12.92*t, step(t, 
 vec3 sRGB(in vec3 c) { return vec3 (sRGB(c.x), sRGB(c.y), sRGB(c.z)); }
 
 // License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
+float getsat(vec3 c) {
+    float mi = min(min(c.x, c.y), c.z);
+    float ma = max(max(c.x, c.y), c.z);
+    return (ma - mi)/(ma+ 1e-7);
+}
+
+// License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
+#define DSP_STR 1.5
 vec3 rgb_lerp(in vec3 a, in vec3 b, in float x) {
     //Interpolated base color (with singularity fix)
     vec3 ic = mix(a, b, x) + vec3(1e-6,0.,0.);
@@ -463,6 +471,11 @@ float tanh_approx(float x) {
 // License: Unknown, author: Unknown, found: don't remember
 float hash(float co) {
   return fract(sin(co*12.9898) * 13758.5453);
+}
+
+// License: Unknown, author: Unknown, found: don't remember
+float hash(in vec2 co) {
+  return fract(sin(dot(co.xy ,vec2(12.9898,58.233))) * 13758.5453);
 }
 
 // License: Unknown, author: Unknown, found: don't remember
