@@ -46,9 +46,21 @@ vec3 rgb2hsv(vec3 c) {
 }
 
 // License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
-float sRGB(float t) { return mix(1.055*pow(t, 1./2.4) - 0.055, 12.92*t, step(t, 0.0031308)); }
-// License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
-vec3 sRGB(in vec3 c) { return vec3 (sRGB(c.x), sRGB(c.y), sRGB(c.z)); }
+vec3 sRGB(vec3 t) {
+  return mix(1.055*pow(t, vec3(1./2.4)) - 0.055, 12.92*t, step(t, vec3(0.0031308)));
+}
+
+// License: Unknown, author: Matt Taylor (https://github.com/64), found: https://64.github.io/tonemapping/
+vec3 aces_approx(vec3 v) {
+  v = max(v, 0.0);
+  v *= 0.6f;
+  float a = 2.51f;
+  float b = 0.03f;
+  float c = 2.43f;
+  float d = 0.59f;
+  float e = 0.14f;
+  return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0.0f, 1.0f);
+}
 
 // License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
 float getsat(vec3 c) {
@@ -210,6 +222,21 @@ float isosceles(vec2 p, vec2 q) {
   vec2 d = min(vec2(dot(a,a), s*(p.x*q.y-p.y*q.x)),
                vec2(dot(b,b), s*(p.y-q.y)));
   return -sqrt(d.x)*sign(d.y);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float box(vec2 p, vec2 b) {
+  vec2 d = abs(p)-b;
+  return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+}
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+float hexagon(vec2 p, float r) {
+  const vec3 k = vec3(-0.866025404,0.5,0.577350269);
+  p = abs(p);
+  p -= 2.0*min(dot(k.xy,p),0.0)*k.xy;
+  p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
+  return length(p)*sign(p.y);
 }
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
@@ -501,6 +528,23 @@ vec4 alphaBlend(vec4 back, vec4 front) {
 vec3 alphaBlend(vec3 back, vec4 front) {
   // Based on: https://en.wikipedia.org/wiki/Alpha_compositing
   return mix(back, front.xyz, front.w);
+}
+
+//  simplified version of Dave Hoskins blur
+vec3 dblur(vec2 q,float rad) {
+  vec3 acc=vec3(0);
+  const float m = 0.002;
+  vec2 pixel=vec2(m*RESOLUTION.y/RESOLUTION.x,m);
+  vec2 angle=vec2(0,rad);
+  rad=1.;
+  const int iter = 30;
+  for (int j=0; j<iter; ++j) {
+    rad += 1./rad;
+    angle*=brot;
+    vec4 col=texture(prevFrame,q+pixel*(rad-1.)*angle);
+    acc+=col.xyz;
+  }
+  return acc*(1.0/float(iter));
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/index.htm
