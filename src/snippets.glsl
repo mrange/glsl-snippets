@@ -501,19 +501,24 @@ float hash(float co) {
 }
 
 // License: Unknown, author: Unknown, found: don't remember
-float hash(in vec2 co) {
+float hash(vec2 co) {
   return fract(sin(dot(co.xy ,vec2(12.9898,58.233))) * 13758.5453);
 }
 
 // License: Unknown, author: Unknown, found: don't remember
-vec2 hash(vec2 p) {
+vec2 hash2(vec2 p) {
   p = vec2(dot (p, vec2 (127.1, 311.7)), dot (p, vec2 (269.5, 183.3)));
-  return -1. + 2.*fract (sin (p)*43758.5453123);
+  return fract(sin(p)*43758.5453123);
 }
 
 // License: Unknown, author: Unknown, found: don't remember
-float hash(vec3 r)  {
+float hash3(vec3 r)  {
   return fract(sin(dot(r.xy,vec2(1.38984*sin(r.z),1.13233*cos(r.z))))*653758.5453);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+vec2 shash2(vec2 p) {
+  return -1.0+2.0*hash2(p);
 }
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
@@ -546,6 +551,43 @@ vec3 dblur(vec2 q,float rad) {
   }
   return acc*(1.0/float(iter));
 }
+
+// License: MIT, author: Inigo Quilez, found: https://www.shadertoy.com/view/XslGRr
+float noise(vec2 p) {
+  // Found at https://www.shadertoy.com/view/sdlXWX
+  // Which then redirected to IQ shader
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f*f*(3.-2.*f);
+
+  float n =
+         mix( mix( dot(shash2(i + vec2(0.,0.) ), f - vec2(0.,0.)),
+                   dot(shash2(i + vec2(1.,0.) ), f - vec2(1.,0.)), u.x),
+              mix( dot(shash2(i + vec2(0.,1.) ), f - vec2(0.,1.)),
+                   dot(shash2(i + vec2(1.,1.) ), f - vec2(1.,1.)), u.x), u.y);
+
+  return 2.0*n;
+}
+
+// License: MIT, author: Inigo Quilez, found: https://www.shadertoy.com/view/XslGRr
+float vnoise(vec2 p) {
+   vec2 i = floor( p );
+   vec2 f = fract( p );
+
+   vec2 u = f*f*(3.0-2.0*f);
+
+   float a = hash( i + vec2(0.0,0.0) );
+   float b = hash( i + vec2(1.0,0.0) );
+   float c = hash( i + vec2(0.0,1.0) );
+   float d = hash( i + vec2(1.0,1.0) );
+
+   float m0 = mix(a, b, u.x);
+   float m1 = mix(c, d, u.x);
+   float m2 = mix(m0, m1, u.y);
+
+   return m2;
+}
+
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/index.htm
 vec3 postProcess(vec3 col, vec2 q) {
