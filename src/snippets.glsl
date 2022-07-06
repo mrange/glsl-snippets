@@ -232,12 +232,13 @@ float box(vec2 p, vec2 b) {
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float hexagon(vec2 p, float r) {
-  const vec3 k = vec3(-0.866025404,0.5,0.577350269);
+  const vec3 k = 0.5*vec3(-sqrt(3.0), 1.0, sqrt(4.0/3.0));
   p = abs(p);
   p -= 2.0*min(dot(k.xy,p),0.0)*k.xy;
   p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
   return length(p)*sign(p.y);
 }
+
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float horseshoe(vec2 p, vec2 c, float r, vec2 w) {
