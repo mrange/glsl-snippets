@@ -62,7 +62,7 @@ float glimglam_c(vec2 p) {
   p = -p.yx;
   float db = roundedBox(p, vec2 (0.166, 0.19), vec4(glimglam_corner1, glimglam_corner0, glimglam_corner1, glimglam_corner0));
   p.x = abs(p.x);
-  float dc = corner(p-vec2(0.055, glimglam_topy))-glimglam_corner0;
+  float dc = corner(p-vec2(0.05, glimglam_topy))-glimglam_corner0;
 
   float d = db;
   d = max(d, -dc);
