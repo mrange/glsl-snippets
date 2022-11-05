@@ -23,6 +23,46 @@
 #define SCA(a)      vec2(sin(a), cos(a))
 #define DOT2(x)     dot(x, x)
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+mat3 rotX(float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return mat3(
+    1.0 , 0.0 , 0.0
+  , 0.0 , +c  , +s
+  , 0.0 , -s  , +c
+  );
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+mat3 rotY(float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return mat3(
+    +c  , 0.0 , +s
+  , 0.0 , 1.0 , 0.0
+  , -s  , 0.0 , +c
+  );
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+mat3 rotZ(float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return mat3(
+    +c  , +s  , 0.0
+  , -s  , +c  , 0.0
+  , 0.0 , 0.0 , 1.0
+  );
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+float ref(inout vec3 p, vec3 r) {
+  float d = dot(p, r);
+  p -= r*min(0.0, d)*2.0;
+  return d < 0.0 ? 0.0 : 1.0;
+}
+
 
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
 const vec4 hsv2rgb_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -125,6 +165,23 @@ vec2 toPolar(vec2 p) {
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec2 toRect(vec2 p) {
   return vec2(p.x*cos(p.y), p.x*sin(p.y));
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+vec3 toSpherical(vec3 p) {
+  float r   = length(p);
+  float t   = acos(p.z/r);
+  float ph  = atan(p.y, p.x);
+  return vec3(r, t, ph);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+vec3 toRect(vec3 p) {
+  float s   = sin(p.z);
+  float x   = s*cos(p.y);
+  float y   = s*sin(p.y);
+  float z   = cos(p.z);
+  return p.x*vec3(x, y, z);
 }
 
 // License: MIT OR CC-BY-NC-4.0, author: mercury, found: https://mercury.sexy/hg_sdf/
@@ -299,6 +356,28 @@ float roundedBox(vec2 p, vec2 b, vec4 r) {
   r.x  = (p.y>0.0)?r.x  : r.y;
   vec2 q = abs(p)-b+r.x;
   return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
+// License: Unknown, author: Unknown, found: shadertoy somewhere, don't remember where
+float dfcos(float x) {
+  return sqrt(x*x+1.0)*0.8-1.8;
+}
+
+// License: Unknown, author: Unknown, found: shadertoy somewhere, don't remember where
+float dfcos(vec2 p, float freq) {
+  // Approximate distance to cos
+  float x = p.x;
+  float y = p.y;
+  x *= freq;
+
+  float x1 = abs(mod(x+PI,TAU)-PI);
+  float x2 = abs(mod(x   ,TAU)-PI);
+
+  float a = 0.18*freq;
+
+  x1 /= max( y*a+1.0-a,1.0);
+  x2 /= max(-y*a+1.0-a,1.0);
+  return (mix(-dfcos(x2)-1.0,dfcos(x1)+1.0,clamp(y*0.5+0.5,0.0,1.0)))/max(freq*0.8,1.0)+max(abs(y)-1.0,0.0)*sign(y);
 }
 
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
@@ -588,7 +667,6 @@ float vnoise(vec2 p) {
 
    return m2;
 }
-
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/index.htm
 vec3 postProcess(vec3 col, vec2 q) {
