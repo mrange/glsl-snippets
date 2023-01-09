@@ -567,7 +567,7 @@ float atan_approx(float y, float x) {
   return y < 0.0 ? -t : t;
 }
 
-// License: Unknown, author: Unknown, found: don't remember
+// License: Unknown, author: Claude Brezinski, found: https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
 float tanh_approx(float x) {
   //  Found this somewhere on the interwebs
   //  return tanh(x);
