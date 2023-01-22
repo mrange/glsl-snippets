@@ -208,6 +208,17 @@ float modMirror1(inout float p, float size) {
   return c;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+float modRadial(inout vec2 p, float o, float m) {
+  float l = length(p);
+  float k = l;
+  l -= o;
+  float n = mod1(l, m);
+
+  p = (l/k)*p;
+  return n;
+}
+
 // License: Unknown, author: Martijn Steinrucken, found: https://www.youtube.com/watch?v=VmrIDyYiJBA
 vec2 hextile(inout vec2 p) {
   // See Art of Code: Hexagonal Tiling Explained!
