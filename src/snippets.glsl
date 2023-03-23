@@ -56,6 +56,17 @@ mat3 rotZ(float a) {
   );
 }
 
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/noacos/
+mat3 rot(vec3 d, vec3 z) {
+  vec3  v = cross( z, d );
+  float c = dot( z, d );
+  float k = 1.0/(1.0+c);
+
+  return mat3( v.x*v.x*k + c,     v.y*v.x*k - v.z,    v.z*v.x*k + v.y,
+               v.x*v.y*k + v.z,   v.y*v.y*k + c,      v.z*v.y*k - v.x,
+               v.x*v.z*k - v.y,   v.y*v.z*k + v.x,    v.z*v.z*k + c    );
+}
+
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float ref(inout vec3 p, vec3 r) {
   float d = dot(p, r);
