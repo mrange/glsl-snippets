@@ -24,6 +24,30 @@
 #define DOT2(x)     dot(x, x)
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define ROTY(a)               \
+  mat3(                       \
+    +cos(a) , 0.0 , +sin(a)   \
+  , 0.0     , 1.0 , 0.0       \
+  , -sin(a) , 0.0 , +cos(a)   \
+  )
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define ROTZ(a)               \
+  mat3(                       \
+    +cos(a) , +sin(a) , 0.0   \
+  , -sin(a) , +cos(a) , 0.0   \
+  , 0.0     , 0.0     , 1.0   \
+  )
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define ROTX(a)               \
+  mat3(                       \
+    1.0 , 0.0     , 0.0       \
+  , 0.0 , +cos(a) , +sin(a)   \
+  , 0.0 , -sin(a) , +cos(a)   \
+  )
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 mat3 rotX(float a) {
   float c = cos(a);
   float s = sin(a);
