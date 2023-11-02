@@ -91,6 +91,12 @@ mat3 rot(vec3 d, vec3 z) {
                v.x*v.z*k - v.y,   v.y*v.z*k + v.x,    v.z*v.z*k + c    );
 }
 
+// License: CC0, author: blackie, found: https://www.shadertoy.com/view/wtVyWK
+vec3 rot(vec3 p, vec3 ax, float ro) {
+  return mix(dot(p,ax)*ax,p,cos(ro))+sin(ro)*cross(ax,p);
+}
+
+
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 float ref(inout vec3 p, vec3 r) {
   float d = dot(p, r);
@@ -98,6 +104,10 @@ float ref(inout vec3 p, vec3 r) {
   return d < 0.0 ? 0.0 : 1.0;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+float linstep(float edge0, float edge1, float x) {
+  return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+}
 
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
 const vec4 hsv2rgb_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
