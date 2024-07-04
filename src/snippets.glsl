@@ -109,6 +109,11 @@ float linstep(float edge0, float edge1, float x) {
   return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 }
 
+// License: Unknown, author: XorDev, found: https://x.com/XorDev/status/1808902860677001297
+vec3 hsv2rgb_approx(vec3 hsv) {
+  return (cos(hsv.x*2*acos(-1.)+vec3(0,4,2))*hsv.y+2-hsv.y)*hsv.z/2;
+}
+
 // License: WTFPL, author: sam hocevar, found: https://stackoverflow.com/a/17897228/418488
 const vec4 hsv2rgb_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 vec3 hsv2rgb(vec3 c) {
