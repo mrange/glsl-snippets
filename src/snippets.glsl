@@ -829,3 +829,67 @@ vec3 oklab_mix(vec3 lin1, vec3 lin2, float a) {
     // cone to rgb
     return kLMStoCONE*(lms*lms*lms);
 }
+
+mat3 fancyRotation(float time) {
+  float
+    angle1 = time * 0.5
+  , angle2 = time * 0.707
+  , angle3 = time * 0.33
+  , c1 = cos(angle1); float s1 = sin(angle1)
+  , c2 = cos(angle2); float s2 = sin(angle2)
+  , c3 = cos(angle3); float s3 = sin(angle3)
+  ;
+
+  return mat3(
+      c1 * c2,
+      c1 * s2 * s3 - c3 * s1,
+      s1 * s3 + c1 * c3 * s2,
+
+      c2 * s1,
+      c1 * c3 + s1 * s2 * s3,
+      c3 * s1 * s2 - c1 * s3,
+
+      -s2,
+      c2 * s3,
+      c2 * c3
+  );
+}
+
+
+// Create a quaternion from axis and angle
+vec4 createQuaternion(vec3 axis, float angle) {
+  float halfAngle = angle * 0.5;
+  float s = sin(halfAngle);
+  return vec4(axis * s, cos(halfAngle));
+}
+
+// Quaternion multiplication
+vec4 multiplyQuaternions(vec4 q1, vec4 q2) {
+  return vec4(
+    q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
+    q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
+    q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w,
+    q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z
+  );
+}
+
+// Rotate a vector using a quaternion
+mat3 rotationFromQuaternion(vec4 q) {
+  // Convert quaternion to a rotation matrix
+  mat3 rotationMatrix = mat3(
+    1.0 - 2.0 * (q.y * q.y + q.z * q.z),
+    2.0 * (q.x * q.y - q.w * q.z),
+    2.0 * (q.x * q.z + q.w * q.y),
+
+    2.0 * (q.x * q.y + q.w * q.z),
+    1.0 - 2.0 * (q.x * q.x + q.z * q.z),
+    2.0 * (q.y * q.z - q.w * q.x),
+
+    2.0 * (q.x * q.z - q.w * q.y),
+    2.0 * (q.y * q.z + q.w * q.x),
+    1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+  );
+
+  return rotationMatrix;
+}
+
