@@ -219,20 +219,16 @@ vec2 toRect(vec2 p) {
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3 toSpherical(vec3 p) {
-  float r   = length(p);
-  float t   = acos(p.z/r);
-  float ph  = atan(p.y, p.x);
-  return vec3(r, t, ph);
+  float r = length(p);
+  return vec3(r, acos(p.z/r), atan(p.y, p.x));
 }
 
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3 toRect(vec3 p) {
-  float s   = sin(p.z);
-  float x   = s*cos(p.y);
-  float y   = s*sin(p.y);
-  float z   = cos(p.z);
-  return p.x*vec3(x, y, z);
+  float s   = sin(p.y);
+  return p.x * vec3(s*cos(p.z), s*sin(p.z), cos(p.y));
 }
+
 
 // License: MIT OR CC-BY-NC-4.0, author: mercury, found: https://mercury.sexy/hg_sdf/
 float mod1(inout float p, float size) {
