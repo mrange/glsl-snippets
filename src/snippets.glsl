@@ -628,6 +628,11 @@ float atan_approx(float y, float x) {
   return y < 0.0 ? -t : t;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+float acos_approx(float x) {
+  return atan_approx(sqrt(max(.0, 1. - x*x)), x);
+}
+
 // License: Unknown, author: Claude Brezinski, found: https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
 float tanh_approx(float x) {
   //  Found this somewhere on the interwebs
