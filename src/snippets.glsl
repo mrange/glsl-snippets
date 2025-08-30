@@ -743,7 +743,63 @@ vec3 postProcess(vec3 col, vec2 q) {
   return col;
 }
 
-// License: Unknowon, author: XorDev, found: https://github.com/XorDev/GM_FXAA
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+// .yz are the partial derivates of the noise function
+vec3 simple_noise(vec2 p) {
+  vec2 C=cos(p),S=sin(p);
+  return vec3(S.x*S.y,C.x*S.y,S.x*C.y);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+// .yzw are the partial derivates of the noise function
+vec4 simple_noise(vec3 p) {
+  vec3 C=cos(p),S=sin(p);
+  return vec4(S.x*S.y*S.z,C.x*S.y*S.z,S.x*C.y*S.z,S.x*S.y*C.z);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+//  Based on simple_dot_noise by XorDev
+// .yz are the partial derivates of the noise function
+vec3 simple_dot_noise(vec2 p) {
+  float noise = dot(sin(p), cos(p*1.618).yx);
+  float dx = cos(p.x) * cos(p.y * 1.618) - sin(p.y) * sin(p.x * 1.618) * 1.618;
+  float dy = -sin(p.x) * sin(p.y * 1.618) * 1.618 + cos(p.y) * cos(p.x * 1.618);
+  return vec3(noise, dx, dy);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+//  Based on simple_dot_noise by XorDev
+// .yzw are the partial derivates of the noise function
+vec4 simple_dot_noise(vec3 p) {
+  float noise = dot(sin(p), cos(p*1.618).yzx);
+  float dx = cos(p.x) * cos(p.y * 1.618) - sin(p.z) * sin(p.x * 1.618) * 1.618;
+  float dy = -sin(p.x) * sin(p.y * 1.618) * 1.618 + cos(p.y) * cos(p.z * 1.618);
+  float dz = -sin(p.y) * sin(p.z * 1.618) * 1.618 + cos(p.z) * cos(p.x * 1.618);
+  return vec4(noise, dx, dy, dz);
+}
+
+// License: Unknown, author: XorDev, found: https://www.shadertoy.com/view/wfsyRX
+float simple_dot_noise(vec3 p) {
+  return dot(sin(p), cos(p*1.618).yzx);
+}
+
+// License: Unknown, author: XorDev, found: https://www.shadertoy.com/view/wfsyRX
+float dot_noise(vec3 p) {
+    //The golden ratio:
+    //https://mini.gmshaders.com/p/phi
+    const float phi = 1.618033988;
+    //Rotating the golden angle on the vec3(1, phi, phi*phi) axis
+    const mat3 gold = mat3(
+    -0.571464913, +0.814921382, +0.096597072,
+    -0.278044873, -0.303026659, +0.911518454,
+    +0.772087367, +0.494042493, +0.399753815);
+
+    //Gyroid with irrational orientations and scales
+    return dot(cos(gold * p), sin(phi * p * gold));
+    //Ranges from [-3 to +3]
+}
+
+// License: Unknown, author: XorDev, found: https://github.com/XorDev/GM_FXAA
 vec4 fxaa(sampler2D tex, vec2 uv, vec2 texelSz) {
   // See this blog
   // https://mini.gmshaders.com/p/gm-shaders-mini-fxaa
