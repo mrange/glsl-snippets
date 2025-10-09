@@ -180,6 +180,45 @@ vec3 rgb_lerp(in vec3 a, in vec3 b, in float x) {
     ic += DSP_STR*dir*sd*ff*lgt;
     return clamp(ic,0.,1.);
 }
+
+const mat3
+  OKLAB_M1=mat3(
+    0.4122214708, 0.5363325363, 0.0514459929
+  , 0.2119034982, 0.6806995451, 0.1073969566
+  , 0.0883024619, 0.2817188376, 0.6299787005
+  )
+, OKLAB_M2=mat3(
+    0.2104542553,  0.7936177850, -0.0040720468
+  , 1.9779984951, -2.4285922050,  0.4505937099
+  , 0.0259040371,  0.7827717662, -0.8086757660
+  )
+, OKLAB_N1 = mat3(
+    1,  0.3963377774,  0.2158037573
+  , 1, -0.1055613458, -0.0638541728
+  , 1, -0.0894841775, -1.2914855480
+  )
+, OKLAB_N2 = mat3(
+     4.0767416621, -3.3077115913,  0.2309699292
+  , -1.2684380046,  2.6097574011, -0.3413193965
+  , -0.0041960863, -0.7034186147,  1.7076147010
+  )
+;
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define LINEARTOOKLAB(c) (OKLAB_M2*pow(OKLAB_M1*(c), vec3(1./3.)))
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+vec3 linearToOklab(vec3 c) {
+  return OKLAB_M2*pow(OKLAB_M1*(c), vec3(1./3.));
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+#define OKLABTOLINEAR(c) (OKLAB_N2*pow(OKLAB_N1*(c),vec3(3)))
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+vec3 oklabToLinear(vec3 c) {
+  return OKLAB_N2*pow(OKLAB_N1*(c),vec3(3));
+}
+
+
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3  saturate(in vec3 a)   { return clamp(a, 0.0, 1.0); }
 vec2  saturate(in vec2 a)   { return clamp(a, 0.0, 1.0); }
@@ -675,6 +714,15 @@ vec4 alphaBlend(vec4 back, vec4 front) {
 vec3 alphaBlend(vec3 back, vec4 front) {
   // Based on: https://en.wikipedia.org/wiki/Alpha_compositing
   return mix(back, front.xyz, front.w);
+}
+
+// License: Unknown, author: Shane, found: Discord private message
+// Tri-Planar blending function. Based on an old Nvidia writeup:
+// GPU Gems 3 - Ryan Geiss: http://http.developer.nvidia.com/GPUGems3/gpugems3_ch01.html
+vec3 tex3D(sampler2D tex, vec3 p, vec3 n) {
+  n = max(abs(n), 0.001); // n = max((abs(n) - 0.2)*7., 0.001); // n = max(abs(n), 0.001), etc.
+  n /= (n.x + n.y + n.z);
+  return (texture(tex, p.yz)*n.x + texture(tex, p.zx)*n.y + texture(tex, p.xy)*n.z).xyz;
 }
 
 //  simplified version of Dave Hoskins blur
