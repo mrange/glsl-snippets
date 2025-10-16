@@ -676,6 +676,15 @@ float tanh_approx(float x) {
   return clamp(x*(27.0 + x2)/(27.0+9.0*x2), -1.0, 1.0);
 }
 
+// License: Unknown, author: XorDev, found: https://bsky.app/profile/xordev.com/post/3m3da656aps2c
+float valueNoise(vec2 x)
+{
+    vec2 i = floor(x);
+    vec2 s = smoothstep(i, i+1.0, x);
+    return mix(mix(rand(i), rand(i + vec2(1,0)), s.x),
+               mix(rand(i+vec2(0,1)), rand(i + 1.0), s.x), s.y);
+}
+
 // License: Unknown, author: Unknown, found: don't remember
 float hash(float co) {
   return fract(sin(co*12.9898) * 13758.5453);
