@@ -856,6 +856,11 @@ float dot_noise(vec3 p) {
     //Ranges from [-3 to +3]
 }
 
+const vec3
+  lum_weights_linear = vec3(0.2126, 0.7152, 0.0722)
+, lum_weights_srgb   = vec3(0.299, 0.587, 0.114)
+;
+
 // License: Unknown, author: XorDev, found: https://github.com/XorDev/GM_FXAA
 vec4 fxaa(sampler2D tex, vec2 uv, vec2 texelSz) {
   // See this blog
