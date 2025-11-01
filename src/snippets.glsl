@@ -215,7 +215,8 @@ vec3 linearToOklab(vec3 c) {
 #define OKLABTOLINEAR(c) (OKLAB_N2*pow(OKLAB_N1*(c),vec3(3)))
 // License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
 vec3 oklabToLinear(vec3 c) {
-  return OKLAB_N2*pow(OKLAB_N1*(c),vec3(3));
+  vec3 v=OKLAB_N1*(c);
+  return OKLAB_N2*(v*v*v);
 }
 
 
