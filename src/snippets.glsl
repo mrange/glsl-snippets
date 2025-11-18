@@ -515,6 +515,21 @@ float bezier(vec2 pos, vec2 A, vec2 B, vec2 C) {
 }
 
 
+const float
+  MISS=-1000.
+;
+
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/intersectors/
+float ray_unitsphere(vec3 ro, vec3 rd) {
+  float
+    b=dot(ro, rd)
+  , c=dot(ro, ro)-1.
+  , h=b*b-c
+  ;
+  if(h<.0) return MISS;
+  return -b-sqrt(h);
+}
+
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/intersectors/
 vec2 ray_box(vec3 ro, vec3 rd, vec3 boxSize, out vec3 outNormal)  {
   vec3
@@ -559,7 +574,7 @@ float ray_sphere(vec3 ro, vec3 rd, vec4 sph) {
   float b = dot(oc, rd);
   float c = dot(oc, oc) - sph.w*sph.w;
   float h = b*b - c;
-  if(h<0.0) return -1.0;
+  if(h<0.0) return MISS;
   h = sqrt(h);
   return -b - h;
 }
@@ -570,7 +585,7 @@ vec2 ray_sphere(vec3 ro, vec3 rd, vec4 sph) {
   float b = dot(oc, rd);
   float c = dot(oc, oc) - sph.w*sph.w;
   float h = b*b - c;
-  if(h<0.0) return vec2(-1.0);
+  if(h<0.0) return vec2(MISS);
   h = sqrt(h);
   return vec2(-b - h, -b + h);
 }
@@ -607,7 +622,7 @@ float ray_torus(vec3 ro, vec3 rd, vec2 tor) {
   // bounding sphere
   {
     float h = n*n - m + (tor.x+tor.y)*(tor.x+tor.y);
-    if(h<0.0) return -1.0;
+    if(h<0.0) return MISS;
     //float t = -n-sqrt(h); // could use this to compute intersections from ro+t*rd
   }
 
@@ -659,10 +674,10 @@ float ray_torus(vec3 ro, vec3 rd, vec2 tor) {
   float d1 = z   - 3.0*c2;
   float d2 = z*z - 3.0*c0;
   if(abs(d1) < 1.0e-4) {
-    if(d2 < 0.0) return -1.0;
+    if(d2 < 0.0) return MISS;
     d2 = sqrt(d2);
   } else {
-    if(d1 < 0.0) return -1.0;
+    if(d1 < 0.0) return MISS;
     d1 = sqrt(d1/2.0);
     d2 = c1/d1;
   }
