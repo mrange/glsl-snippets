@@ -142,14 +142,16 @@ vec3 sRGB(vec3 t) {
 
 // License: Unknown, author: Matt Taylor (https://github.com/64), found: https://64.github.io/tonemapping/
 vec3 aces_approx(vec3 v) {
-  v = max(v, 0.0);
-  v *= 0.6;
-  float a = 2.51;
-  float b = 0.03;
-  float c = 2.43;
-  float d = 0.59;
-  float e = 0.14;
-  return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0.0, 1.0);
+  const float
+    a = 2.51
+  , b = 0.03
+  , c = 2.43
+  , d = 0.59
+  , e = 0.14
+  ;
+  v = max(v, 0.);
+  v *= .6;
+  return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0., 1.);
 }
 
 // License: Unknown, author: nmz (twitter: @stormoid), found: https://www.shadertoy.com/view/NdfyRM
@@ -513,8 +515,46 @@ float bezier(vec2 pos, vec2 A, vec2 B, vec2 C) {
 }
 
 
+// License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/intersectors/
+vec2 ray_box(vec3 ro, vec3 rd, vec3 boxSize, out vec3 outNormal)  {
+  vec3
+    m = 1.0/rd  // can precompute if traversing a set of aligned boxes
+  , n = m*ro    // can precompute if traversing a set of aligned boxes
+  , k = abs(m)*boxSize
+  , t1 = -n - k
+  , t2 = -n + k
+  ;
+  float
+    tN = max( max( t1.x, t1.y ), t1.z )
+  , tF = min( min( t2.x, t2.y ), t2.z )
+  ;
+  if( tN>tF || tF<0.0) return vec2(MISS); // no intersection
+  outNormal = (tN>0.0) ? step(vec3(tN),t1) : // ro ouside the box
+                         step(t2,vec3(tF));  // ro inside the box
+  outNormal *= -sign(rd);
+  return vec2( tN, tF );
+}
+
+
+float ray_xy_plane(vec3 ro, vec3 rd, float o) {
+  float t=(o-ro.y)/rd.y;
+  return t;
+}
+
+vec2 ray_cylinder(vec3 ro, vec3 rd, float ra) {
+  float
+      a=dot(rd.xy, rd.xy)
+    , b=dot(ro.xy, rd.xy)
+    , c=dot(ro.xy, ro.xy) - ra*ra
+    , h=b*b - a*c
+    ;
+  if(h < 0.0) return vec2(MISS);
+  h = sqrt(h);
+  return vec2(-b-h, -b+h)/a;
+}
+
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
-float raySphere(vec3 ro, vec3 rd, vec4 sph) {
+float ray_sphere(vec3 ro, vec3 rd, vec4 sph) {
   vec3 oc = ro - sph.xyz;
   float b = dot(oc, rd);
   float c = dot(oc, oc) - sph.w*sph.w;
@@ -525,7 +565,7 @@ float raySphere(vec3 ro, vec3 rd, vec4 sph) {
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
-vec2 raySphere2(vec3 ro, vec3 rd, vec4 sph) {
+vec2 ray_sphere(vec3 ro, vec3 rd, vec4 sph) {
   vec3 oc = ro - sph.xyz;
   float b = dot(oc, rd);
   float c = dot(oc, oc) - sph.w*sph.w;
@@ -536,7 +576,7 @@ vec2 raySphere2(vec3 ro, vec3 rd, vec4 sph) {
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/spherefunctions/spherefunctions.htm
-float raySphereDensity(vec3 ro, vec3 rd, vec4 sph, float dbuffer) {
+float ray_sphere_density(vec3 ro, vec3 rd, vec4 sph, float dbuffer) {
   float ndbuffer = dbuffer/sph.w;
   vec3  rc = (ro - sph.xyz)/sph.w;
   float b = dot(rd,rc);
@@ -555,7 +595,7 @@ float raySphereDensity(vec3 ro, vec3 rd, vec4 sph, float dbuffer) {
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-float rayTorus(vec3 ro, vec3 rd, vec2 tor) {
+float ray_torus(vec3 ro, vec3 rd, vec2 tor) {
   float po = 1.0;
 
   float Ra2 = tor.x*tor.x;
