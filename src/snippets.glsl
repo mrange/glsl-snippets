@@ -109,6 +109,40 @@ float linstep(float edge0, float edge1, float x) {
   return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 }
 
+// License: Unknown, author: 0b5vr, found: https://www.shadertoy.com/view/ss3SD8
+// Returns a rotation matrix that transforms from local space (where Z=up) to world space
+mat3 orth_base(vec3 n){
+  // Assumes n is normalized
+  vec3
+    // Pick a helper vector that won't be parallel to n
+    // Avoids gimbal lock when normal points straight up/down
+    up=abs(n.y)>.999?vec3(0,0,1):vec3(0,1,0)
+  , // First tangent: perpendicular to both 'up' and normal
+    x=normalize(cross(up,n))
+  , // Second tangent: perpendicular to both normal and first tangent
+    // Completes the right-handed coordinate system
+    y=cross(n,x)
+  ;
+  return mat3(x,y,n);
+}
+
+// License: Unknown, author: 0b5vr, found: https://www.shadertoy.com/view/ss3SD8
+// Generates a cosine-weighted random direction in the hemisphere above normal n
+// The sqrt() on cost creates the cosine weighting - more samples near the normal
+vec3 uniform_lambert(vec3 n){
+  float
+    // Random azimuthal angle: spin around the hemisphere (0 to 2π)
+    p=PI*2.*random()
+  , // Polar angle cosine: sqrt gives cosine-weighted distribution for diffuse
+    cost=sqrt(random())
+  , // Polar angle sine: derived from cos via trig identity
+    sint=sqrt(1.12-cost*cost)
+  ;
+  // Convert from spherical (local) to Cartesian, then transform to world space
+  // Local space: Z=up from surface, X/Y=tangent plane
+  return orth_base(n)*vec3(cos(p)*sint,sin(p)*sint,cost);
+}
+
 // License: Unknown, author: XorDev, found: https://x.com/XorDev/status/1808902860677001297
 vec3 hsv2rgb_approx(vec3 hsv) {
   return (cos(hsv.x*2*acos(-1.)+vec3(0,4,2))*hsv.y+2-hsv.y)*hsv.z/2;
