@@ -136,7 +136,7 @@ vec3 uniform_lambert(vec3 n){
   , // Polar angle cosine: sqrt gives cosine-weighted distribution for diffuse
     cost=sqrt(random())
   , // Polar angle sine: derived from cos via trig identity
-    sint=sqrt(1.12-cost*cost)
+    sint=sqrt(1.-cost*cost)
   ;
   // Convert from spherical (local) to Cartesian, then transform to world space
   // Local space: Z=up from surface, X/Y=tangent plane
@@ -763,6 +763,14 @@ float tanh_approx(float x) {
   //  Found this somewhere on the interwebs
   //  return tanh(x);
   float x2 = x*x;
+  return clamp(x*(27.0 + x2)/(27.0+9.0*x2), -1.0, 1.0);
+}
+
+// License: Unknown, author: Claude Brezinski, found: https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
+vec3 tanh_approx(vec3 x) {
+  //  Found this somewhere on the interwebs
+  //  return tanh(x);
+  vec3 x2 = x*x;
   return clamp(x*(27.0 + x2)/(27.0+9.0*x2), -1.0, 1.0);
 }
 
