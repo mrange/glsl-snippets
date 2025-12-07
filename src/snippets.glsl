@@ -109,6 +109,17 @@ float linstep(float edge0, float edge1, float x) {
   return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 }
 
+// License: Unknown, author: catnip, found: FieldFX discord
+vec3 point_on_sphere(vec2 r) {
+  r=vec2(PI*2.*r.x, 2.*r.y-1.);
+  return vec3(sqrt(1. - r.y * r.y) * vec2(cos(r.x), sin(r.x)), r.y);
+}
+
+// License: Unknown, author: catnip, found: FieldFX discord
+vec3 uniform_lambert_approx(vec2 r, vec3 n) {
+  return normalize(n*(1.001) + point_on_sphere(r)); // 1.001 required to avoid NaN
+}
+
 // License: Unknown, author: 0b5vr, found: https://www.shadertoy.com/view/ss3SD8
 // Returns a rotation matrix that transforms from local space (where Z=up) to world space
 mat3 orth_base(vec3 n){
@@ -129,12 +140,12 @@ mat3 orth_base(vec3 n){
 // License: Unknown, author: 0b5vr, found: https://www.shadertoy.com/view/ss3SD8
 // Generates a cosine-weighted random direction in the hemisphere above normal n
 // The sqrt() on cost creates the cosine weighting - more samples near the normal
-vec3 uniform_lambert(vec3 n){
+vec3 uniform_lambert(vec2 r, vec3 n){
   float
     // Random azimuthal angle: spin around the hemisphere (0 to 2π)
-    p=PI*2.*random()
+    p=PI*2.*r.x
   , // Polar angle cosine: sqrt gives cosine-weighted distribution for diffuse
-    cost=sqrt(random())
+    cost=sqrt(r.y)
   , // Polar angle sine: derived from cos via trig identity
     sint=sqrt(1.-cost*cost)
   ;
@@ -775,12 +786,37 @@ vec3 tanh_approx(vec3 x) {
 }
 
 // License: Unknown, author: XorDev, found: https://bsky.app/profile/xordev.com/post/3m3da656aps2c
-float valueNoise(vec2 x)
-{
-    vec2 i = floor(x);
-    vec2 s = smoothstep(i, i+1.0, x);
-    return mix(mix(rand(i), rand(i + vec2(1,0)), s.x),
-               mix(rand(i+vec2(0,1)), rand(i + 1.0), s.x), s.y);
+float valueNoise(vec2 x) {
+   vec2 i = floor(x);
+   vec2 s = smoothstep(i, i+1.0, x);
+   return mix(mix(rand(i), rand(i + vec2(1,0)), s.x),
+              mix(rand(i+vec2(0,1)), rand(i + 1.0), s.x), s.y);
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+//  When the precision of the sin based hashes aren't enough
+float uhash(float co) {
+  uint k = floatBitsToUint(co);
+  k ^= k >> 16u;
+  k *= 0x85ebca6bu;
+  k ^= k >> 13u;
+  k *= 0xc2b2ae35u;
+  k ^= k >> 16u;
+    return float(k) / 4294967295.0;
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+//  When the precision of the sin based hashes aren't enough
+float uhash_better(float co) {
+  uint x = floatBitsToUint(co);
+  x ^= x >> 17u;
+  x *= 0xed5ad4bbu;
+  x ^= x >> 11u;
+  x *= 0xac4c1b51u;
+  x ^= x >> 15u;
+  x *= 0x31848babu;
+  x ^= x >> 14u;
+  return float(x) / 4294967295.0;
 }
 
 // License: Unknown, author: Unknown, found: don't remember
