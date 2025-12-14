@@ -575,6 +575,74 @@ float ray_unitsphere(vec3 ro, vec3 rd) {
   return -b-sqrt(h);
 }
 
+vec4 ray_cylinder(vec3 ro, vec3 rd, float r) {
+  float
+      a=dot(rd.xz, rd.xz)
+    , b=dot(ro.xz, rd.xz)
+    , c=dot(ro.xz, ro.xz) - r*r
+    , h=b*b - a*c
+    , t
+    ;
+  vec2
+      n
+    ;
+
+  h = sqrt(h);
+  t = (-b-h)/a;
+
+  n=ro.xz+ro.xz*t;
+
+  return vec4((-b-h)/a,normalize(vec3(n.x,0,n.y)));
+}
+
+vec4 ray_cylinder(vec3 ro, vec3 rd, float r, float R, float h) {
+  float
+      a =dot(rd.xz, rd.xz)
+    , b =dot(ro.xz, rd.xz)
+    , c =dot(ro.xz, ro.xz)
+    , d =b*b - a*(c - r*r)
+    , D =b*b - a*(c - R*R)
+    , t=1e3
+    , TO
+    , TI
+    , TC
+    , d2
+    ;
+
+  vec3 p,n;
+
+  // Outer surface
+  d = sqrt(d);
+  TO = (-b-d)/a;
+  p = ro + rd*TO;
+  if(d>=0. && p.y <= h && TO > 0.) {
+    t=TO;
+    n = vec3(p.x, 0, p.z);
+  }
+
+  // Inner surface
+  D = sqrt(D);
+  TI=(-b+D)/a;
+  p = ro + rd*TI;
+  if(D>=0. && p.y <= h && TI > 0. && TI < t) {
+    t = TI;
+    n = -vec3(p.x, 0, p.z);
+  }
+
+  // Top cap
+  TC = (h - ro.y) / rd.y;
+  p = ro + rd*TC;
+  d2 = dot(p.xz, p.xz);
+  if(TC > 0. && TC < t && d2 <= r*r && d2 >= R*R) {
+    t = TC;
+    n = vec3(0, 1, 0);
+  }
+
+  n=normalize(n);
+
+  return vec4(t, n);
+}
+
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/intersectors/
 vec2 ray_box(vec3 ro, vec3 rd, vec3 boxSize, out vec3 outNormal)  {
   vec3
