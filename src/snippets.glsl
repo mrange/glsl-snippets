@@ -887,6 +887,28 @@ float uhash_better(float co) {
   return float(x) / 4294967295.0;
 }
 
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+// Spherical pattern
+float cubicPattern(vec3 p) {
+  vec3 q = p*p*p;
+  return fract(dot(q, vec3(12.9898, 78.233, 45.164)));
+}
+
+// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippet
+// Spherical pattern
+float geodesic(vec3 p) {
+  vec3 q = abs(p);
+  float d1 = abs(q.x + q.y + q.z - 1.732);
+  float d2 = abs(q.x - q.y);
+  float d3 = abs(q.y - q.z);
+  float d4 = abs(q.z - q.x);
+
+  float pattern = min(min(d1, d2), min(d3, d4));
+  return fract(pattern * 8.0);
+}
+
+
+
 // License: Unknown, author: Unknown, found: don't remember
 float hash(float co) {
   return fract(sin(co*12.9898) * 13758.5453);
