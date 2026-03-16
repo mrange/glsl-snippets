@@ -827,14 +827,19 @@ vec3 torusNormal(vec3 pos, vec2 tor) {
 
 // License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV
 float atan_approx(float y, float x) {
-  float cosatan2 = x / (abs(x) + abs(y));
-  float t = PI_2 - cosatan2 * PI_2;
-  return y < 0.0 ? -t : t;
+  float cosatan2 = x/(abs(x)+abs(y));
+  float t = PI_2-cosatan2*PI_2;
+  return y<0.?-t:t;
 }
 
-// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+// License: Unknown, author: Abramowitz & Stegun , found: Handbook of Mathematical Functions (formula 4.4.45)
 float acos_approx(float x) {
-  return atan_approx(sqrt(max(.0, 1. - x*x)), x);
+  float 
+    ax = abs(x)
+  , r  = ax*(-.0187293*ax+.0742610)-.2121144
+  ;
+  r = (r*ax+PI_2)*sqrt(1.-ax);
+  return x<0.?PI-r:r;
 }
 
 // License: Unknown, author: Claude Brezinski, found: https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
