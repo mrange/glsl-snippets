@@ -120,6 +120,20 @@ vec3 uniform_lambert_approx(vec2 r, vec3 n) {
   return normalize(n*(1.001) + point_on_sphere(r)); // 1.001 required to avoid NaN
 }
 
+// License: Unknown, author: Unknown, found: "On the internet"
+vec3 noisy_reflect(vec2 r, vec3 rd, vec3 n, float blur) {
+  vec3
+    R = reflect(rd, n)
+  , T = normalize(abs(R.y) < .999 ? cross(R, vec3(0,1,0)) : cross(R, vec3(1,0,0)))
+  , B = cross(R, T)
+  ;
+  float
+    a = TAU * r.x
+  , d = blur * sqrt(r.y)
+  ;
+  return normalize(R + d * (cos(a) * T + sin(a) * B));
+}
+
 // License: Unknown, author: 0b5vr, found: https://www.shadertoy.com/view/ss3SD8
 // Returns a rotation matrix that transforms from local space (where Z=up) to world space
 mat3 orth_base(vec3 n){
@@ -827,14 +841,39 @@ vec3 torusNormal(vec3 pos, vec2 tor) {
 
 // License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV
 float atan_approx(float y, float x) {
-  float cosatan2 = x / (abs(x) + abs(y));
-  float t = PI_2 - cosatan2 * PI_2;
-  return y < 0.0 ? -t : t;
+  float
+    cosatan2  = x/(abs(x)+abs(y))
+  , t         = -cosatan2*PI_2+PI_2
+  ;
+  return y<0.?-t:t;
 }
 
-// License: CC0, author: Mårten Rånge, found: https://github.com/mrange/glsl-snippets
+// License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV
+float atan_approx(float y, float x) {
+  float
+    cosatan2  = x*(.5*abs(x)+.5)/(abs(x)+abs(y)*.7071)
+  , t         = -cosatan2*PI_2+PI_2
+  ;
+  return y<0.?-t:t;
+}
+
+// License: MIT, author: Pascal Gilcher, found: https://www.shadertoy.com/view/flSXRV
 float acos_approx(float x) {
-  return atan_approx(sqrt(max(.0, 1. - x*x)), x);
+  float
+    o = -.156583*abs(x)+PI_2
+    ;
+  o*=sqrt(1.-abs(x));
+  return x>.0?o:PI-o;
+}
+
+// License: Unknown, author: Abramowitz & Stegun , found: Handbook of Mathematical Functions (formula 4.4.45)
+float acos_approx(float x) {
+  float
+    ax = abs(x)
+  , r  = ax*(-.0187293*ax+.0742610)-.2121144
+  ;
+  r = (r*ax+PI_2)*sqrt(1.-ax);
+  return x<0.?PI-r:r;
 }
 
 // License: Unknown, author: Claude Brezinski, found: https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
