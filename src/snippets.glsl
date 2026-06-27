@@ -243,6 +243,16 @@ vec3 rgb_lerp(in vec3 a, in vec3 b, in float x) {
 }
 
 const mat3
+    klab_m0=mat3(65,26,14,65,-7,-4,65,-6,-84)/65.
+  , klab_m2=mat3(31,40,4,16,51,8,7,21,47)/75.
+  , klab_m1=inverse(m2),m3=inverse(m0)
+  ;
+// License: Unknown, author: Piter Pasma, found: https://bsky.app/profile/piterpasma.nl/post/3mmhvyrblgs2l
+vec3 lrgb2klab(vec3 lrgb){return pow(lrgb*klab_m2,1./vec3(3))*klab_m3;}
+// License: Unknown, author: Piter Pasma, found: https://bsky.app/profile/piterpasma.nl/post/3mmhvyrblgs2l
+vec3 klab2lrgb(vec3 klab){return pow(klab_klab*m0,vec3(3))*klab_m1;}
+
+const mat3
   OKLAB_M1=mat3(
     0.4122214708, 0.5363325363, 0.0514459929
   , 0.2119034982, 0.6806995451, 0.1073969566
