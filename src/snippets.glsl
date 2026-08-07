@@ -245,7 +245,8 @@ vec3 rgb_lerp(in vec3 a, in vec3 b, in float x) {
 const mat3
     klab_m0=mat3(65,26,14,65,-7,-4,65,-6,-84)/65.
   , klab_m2=mat3(31,40,4,16,51,8,7,21,47)/75.
-  , klab_m1=inverse(m2),m3=inverse(m0)
+  , klab_m1=inverse(m2)
+  , klab_m3=inverse(m0)
   ;
 // License: Unknown, author: Piter Pasma, found: https://bsky.app/profile/piterpasma.nl/post/3mmhvyrblgs2l
 vec3 lrgb2klab(vec3 lrgb){return pow(lrgb*klab_m2,1./vec3(3))*klab_m3;}
@@ -301,6 +302,10 @@ float dot2(vec2 x) {
   return dot(x, x);
 }
 
+
+float smax(float a, float b, float k) {
+  return (a+b+sqrt((a-b)*(a-b)+k))/2.;
+}
 
 // License: MIT, author: Inigo Quilez, found: https://www.iquilezles.org/www/articles/smin/smin.htm
 float pmin(float a, float b, float k) {
@@ -1197,6 +1202,72 @@ vec4 fxaa(sampler2D tex, vec2 uv, vec2 texelSz) {
 
   //If the average is outside the luma range, using the middle average
   return ((lumaB < lumaMin) || (lumaB > lumaMax)) ? A : B;
+}
+
+float dlinTex(sampler2D tex, vec2 p) {
+  vec2
+    sz=vec2(textureSize(tex, 0))
+  , tx=clamp(p*sz-.5,vec2(0), sz-2.)
+  , ntx=floor(tx)
+  , ftx=fract(tx)
+  ;
+  ivec2
+    itx=ivec2(ntx)
+  ;
+
+  vec4
+    c00 = texelFetch(tex, itx+ivec2(0,0), 0)
+  , c01 = texelFetch(tex, itx+ivec2(0,1), 0)
+  , c10 = texelFetch(tex, itx+ivec2(1,0), 0)
+  , c11 = texelFetch(tex, itx+ivec2(1,1), 0)
+  ;
+
+  float
+    d00 = decode(c00)
+  , d01 = decode(c01)
+  , d10 = decode(c10)
+  , d11 = decode(c11)
+  , d   = mix(
+      mix(d00, d01, ftx.y)
+    , mix(d10, d11, ftx.y)
+    , ftx.x
+    )
+  ;
+
+  return -1.+2.*d;
+}
+
+
+float dlinTex2(sampler2D tex, vec2 p) {
+  vec2
+    sz  = vec2(textureSize(tex, 0))
+  , stride = clamp(vec2(dFdx(p).x, dFdy(p).y) * sz, vec2(1.), vec2(16.))
+  , tx  = clamp(p*sz - stride*.5, vec2(0.), sz - stride - 1.)
+  , ntx = floor(tx)
+  , ftx = fract(tx)
+  ;
+  ivec2
+    itx = ivec2(ntx)
+  , istr = ivec2(stride)
+  ;
+  vec4
+    c00 = texelFetch(tex, itx+ivec2(0,       0      ), 0)
+  , c01 = texelFetch(tex, itx+ivec2(0,       istr.y ), 0)
+  , c10 = texelFetch(tex, itx+ivec2(istr.x,  0      ), 0)
+  , c11 = texelFetch(tex, itx+ivec2(istr.x,  istr.y ), 0)
+  ;
+  float
+    d00 = decode(c00)
+  , d01 = decode(c01)
+  , d10 = decode(c10)
+  , d11 = decode(c11)
+  , d   = mix(
+      mix(d00, d01, ftx.y)
+    , mix(d10, d11, ftx.y)
+    , ftx.x
+    )
+  ;
+  return -1.+2.*d;
 }
 
 // License: MIT, author: Inigo Quilez, found: https://www.shadertoy.com/view/ttcyRS
