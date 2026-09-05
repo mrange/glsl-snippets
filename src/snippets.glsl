@@ -115,6 +115,46 @@ vec3 point_on_sphere(vec2 r) {
   return vec3(sqrt(1. - r.y * r.y) * vec2(cos(r.x), sin(r.x)), r.y);
 }
 
+// License: MIT, author: Inigo Quilez, found: shadertoy somewhere, don't remember where
+vec3 normal(vec3 p) {
+  const vec2
+    e=vec2(EPSILON,-EPSILON)
+  ;
+  // Samples distance field 4 times
+  return normalize(
+    e.xyy*df(p+e.xyy)
+  + e.yyx*df(p+e.yyx)
+  + e.yxy*df(p+e.yxy)
+  + e.xxx*df(p+e.xxx)
+  );
+}
+
+// License: MIT, author: Inigo Quilez, found: shadertoy somewhere, don't remember where
+vec3 normal(vec3 p) {
+  const vec2
+    e=vec2(EPSILON,0)
+  ;
+  // Samples distance field 6 times
+  return normalize(vec3(
+    df(p+e.xyy)-df(p-e.xyy)
+  , df(p+e.yxy)-df(p-e.yxy)
+  , df(p+e.yyx)-df(p-e.yyx)
+  ));
+}
+
+vec3 normal(vec2 p) {
+  vec2
+    eps=vec2(EPSILON,0)
+  ;
+  // Sample height field 4 times
+  return  normalize(vec3(
+    hf(p + eps.xy)-hf(p-eps.xy),
+    2.*eps.x,
+    hf(p+eps.yx)-hf(p-eps.yx)
+  ));
+}
+
+
 // License: Unknown, author: catnip, found: FieldFX discord
 vec3 uniform_lambert_approx(vec2 r, vec3 n) {
   return normalize(n*(1.001) + point_on_sphere(r)); // 1.001 required to avoid NaN
